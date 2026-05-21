@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>♥ I Love You ♥</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        body {
+            background-color: black;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="heartCanvas"></canvas>
+
+    <script>
+        // 获取Canvas元素和上下文
+        const canvas = document.getElementById('heartCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 设置Canvas尺寸为屏幕大小
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // 变量定义
+        let z = 0.0;
+        let size = 10;
+        let j = 0;
+        const screenWidth = canvas.width;
+        const screenHeight = canvas.height;
+
+        // 随机数工具函数
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        // 绘制心形动画
+        function drawHeart() {
+            // 创建离屏画布（模拟Java的Image）
+            const offscreenCanvas = document.createElement('canvas');
+            offscreenCanvas.width = screenWidth;
+            offscreenCanvas.height = screenHeight;
+            const offscreenCtx = offscreenCanvas.getContext('2d');
+
+            // 交替改变尺寸（对应Java的j%2）
+            size = j % 2 === 0 ? 14.5 : 15;
+
+            // 绘制粒子
+            for (let i = 30; i > 0; i--) {
+                // 随机粉色系颜色
+                const r = 255;
+                const g = 175;
+                const b = random(220, 240);
+                const color = `rgb(${r}, ${g}, ${b})`;
+
+                for (let k = 1; k < 400; k++) {
+                    const px = Math.floor(random(0, 10));
+                    const py = Math.floor(random(0, 10));
+                    
+                    // 心形公式（和Java保持一致）
+                    const x = 16 * (Math.sin(z) ** 3) * size + 
+                              Math.pow(-1, px) * random(0, 1) * i * Math.sqrt(i) + 
+                              screenWidth / 2;
+                    
+                    const y = -(13 * Math.cos(z) - 5 * Math.cos(2 * z) - 
+                               2 * Math.cos(3 * z) - Math.cos(4 * z)) * size + 
+                              Math.pow(-1, py) * random(0, 1) * i * Math.sqrt(i) + 
+                              screenHeight / 3 + 100;
+                    
+                    z += (Math.PI / 2.0) / 80;
+
+                    // 绘制粒子点
+                    offscreenCtx.fillStyle = color;
+                    offscreenCtx.fillRect(Math.round(x), Math.round(y), 2, 2);
+                }
+
+                // 绘制文字（i<3时）
+                if (i < 3) {
+                    offscreenCtx.font = 'bold 50px 楷体, KaiTi, sans-serif';
+                    offscreenCtx.fillStyle = 'pink';
+                    offscreenCtx.fillText('I Love You!', screenWidth / 2 - 150, screenHeight / 2 - 66);
+                }
+            }
+
+            // 清空主画布并绘制离屏内容
+            ctx.clearRect(0, 0, screenWidth, screenHeight);
+            ctx.drawImage(offscreenCanvas, 0, 0);
+
+            // 计数器递增
+            j++;
+            if (j > 666) j = 0; // 循环播放（原Java是break，这里改为循环）
+
+            // 控制动画帧率（对应Java的Thread.sleep(500)）
+            setTimeout(() => {
+                requestAnimationFrame(drawHeart);
+            }, 500);
+        }
+
+        // 启动动画
+        drawHeart();
+
+        // 兼容窗口大小变化
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+        });
+    </script>
+</body>
+</html>
